@@ -1,0 +1,32 @@
+{
+  "name": "AIOps Zabbix Remediation",
+  "nodes": [
+    {
+      "parameters": { "httpMethod": "POST", "path": "zabbix-alert" },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4-turbo",
+        "prompt": "Evaluate the attached server log. Does this OOM error require a service restart?"
+      },
+      "name": "LLM Log Evaluation",
+      "type": "n8n-nodes-base.openAi"
+    },
+    {
+      "parameters": {
+        "url": "https://internal-server.local/remediate",
+        "method": "POST",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "service", "value": "nginx" },
+            { "name": "action", "value": "restart" }
+          ]
+        }
+      },
+      "name": "Execute SSH Script",
+      "type": "n8n-nodes-base.httpRequest"
+    }
+  ]
+}
